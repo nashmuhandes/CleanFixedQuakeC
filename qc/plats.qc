@@ -17,7 +17,6 @@
     See file, 'COPYING', for details.
 */
 
-
 void() plat_center_touch;
 void() plat_outside_touch;
 void() plat_trigger_use;
@@ -55,12 +54,12 @@ void() plat_spawn_inside_trigger =
 		tmax_y = tmin_y + 1;
 	}
 
-	setsize (trigger, tmin, tmax);
+	setsize(trigger, tmin, tmax);
 };
 
 void() plat_hit_top =
 {
-	sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+	sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 	self.state = STATE_TOP;
 	self.think = plat_go_down;
 	self.nextthink = self.ltime + 3;
@@ -68,22 +67,22 @@ void() plat_hit_top =
 
 void() plat_hit_bottom =
 {
-	sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+	sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 	self.state = STATE_BOTTOM;
 };
 
 void() plat_go_down =
 {
-	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+	sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	self.state = STATE_DOWN;
-	SUB_CalcMove (self.pos2, self.speed, plat_hit_bottom);
+	SUB_CalcMove(self.pos2, self.speed, plat_hit_bottom);
 };
 
 void() plat_go_up =
 {
-	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+	sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	self.state = STATE_UP;
-	SUB_CalcMove (self.pos1, self.speed, plat_hit_top);
+	SUB_CalcMove(self.pos1, self.speed, plat_hit_top);
 };
 
 void() plat_center_touch =
@@ -96,9 +95,9 @@ void() plat_center_touch =
 
 	self = self.enemy;
 	if (self.state == STATE_BOTTOM)
-		plat_go_up ();
+		plat_go_up();
+	// delay going down
 	else if (self.state == STATE_TOP)
-		// delay going down
 		self.nextthink = self.ltime + 1;
 };
 
@@ -112,38 +111,36 @@ void() plat_outside_touch =
 
 	self = self.enemy;
 	if (self.state == STATE_TOP)
-		plat_go_down ();
+		plat_go_down();
 };
 
 void() plat_trigger_use =
 {
+	// already activated
 	if (self.think)
-		// allready activated
 		return;
 	plat_go_down();
 };
 
-
 void() plat_crush =
 {
-	T_Damage (other, self, self, 1);
+	T_Damage(other, self, self, 1);
 
 	if (self.state == STATE_UP)
-		plat_go_down ();
+		plat_go_down();
 	else if (self.state == STATE_DOWN)
-		plat_go_up ();
+		plat_go_up();
 	else
-		objerror ("plat_crush: bad self.state\n");
+		objerror("plat_crush: bad self.state\n");
 };
 
 void() plat_use =
 {
 	self.use = SUB_Null;
 	if (self.state != STATE_UP)
-		objerror ("plat_use: not in up state");
+		objerror("plat_use: not in up state");
 	plat_go_down();
 };
-
 
 /*QUAKED func_plat (0 .5 .8) ? PLAT_LOW_TRIGGER
 speed	default 150
@@ -157,8 +154,6 @@ Set "sounds" to one of the following:
 1) base fast
 2) chain slow
 */
-
-
 void() func_plat =
 {
 	if (!self.t_length)
@@ -172,16 +167,16 @@ void() func_plat =
 	// FIX THIS TO LOAD A GENERIC PLAT SOUND
 	if (self.sounds == 1)
 	{
-		precache_sound ("plats/plat1.wav");
-		precache_sound ("plats/plat2.wav");
+		precache_sound("plats/plat1.wav");
+		precache_sound("plats/plat2.wav");
 		self.noise = "plats/plat1.wav";
 		self.noise1 = "plats/plat2.wav";
 	}
 
 	if (self.sounds == 2)
 	{
-		precache_sound ("plats/medplat1.wav");
-		precache_sound ("plats/medplat2.wav");
+		precache_sound("plats/medplat1.wav");
+		precache_sound("plats/medplat2.wav");
 		self.noise = "plats/medplat1.wav";
 		self.noise1 = "plats/medplat2.wav";
 	}
@@ -193,9 +188,9 @@ void() func_plat =
 	self.classname = "plat";
 	self.solid = SOLID_BSP;
 	self.movetype = MOVETYPE_PUSH;
-	setorigin (self, self.origin);
-	setmodel (self, self.model);
-	setsize (self, self.mins , self.maxs);
+	setorigin(self, self.origin);
+	setmodel(self, self.model);
+	setsize(self, self.mins, self.maxs);
 
 	self.blocked = plat_crush;
 	if (!self.speed)
@@ -212,7 +207,7 @@ void() func_plat =
 	self.use = plat_trigger_use;
 
 	// the "start moving" trigger
-	plat_spawn_inside_trigger ();
+	plat_spawn_inside_trigger();
 
 	if (self.targetname != string_null)
 	{
@@ -221,12 +216,10 @@ void() func_plat =
 	}
 	else
 	{
-		setorigin (self, self.pos2);
+		setorigin(self, self.pos2);
 		self.state = STATE_BOTTOM;
 	}
 };
-
-//============================================================================
 
 void() train_next;
 void() func_train_find;
@@ -236,12 +229,12 @@ void() train_blocked =
 	if (time < self.attack_finished)
 		return;
 	self.attack_finished = time + 0.5;
-	T_Damage (other, self, self, self.dmg);
+	T_Damage(other, self, self, self.dmg);
 };
 void() train_use =
 {
+	// already activated
 	if (self.think != func_train_find)
-		// already activated
 		return;
 	train_next();
 };
@@ -251,7 +244,7 @@ void() train_wait =
 	if (self.wait)
 	{
 		self.nextthink = self.ltime + self.wait;
-		sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+		sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	}
 	else
 		self.nextthink = self.ltime + 0.1;
@@ -263,16 +256,16 @@ void() train_next =
 {
 	local entity targ;
 
-	targ = find (world, targetname, self.target);
+	targ = find(world, targetname, self.target);
 	self.target = targ.target;
 	if (!self.target)
-		objerror ("train_next: no next target");
+		objerror("train_next: no next target");
 	if (targ.wait)
 		self.wait = targ.wait;
 	else
 		self.wait = 0;
-	sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
-	SUB_CalcMove (targ.origin - self.mins, self.speed, train_wait);
+	sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+	SUB_CalcMove(targ.origin - self.mins, self.speed, train_wait);
 };
 
 void() func_train_find =
@@ -280,9 +273,9 @@ void() func_train_find =
 {
 	local entity targ;
 
-	targ = find (world, targetname, self.target);
+	targ = find(world, targetname, self.target);
 	self.target = targ.target;
-	setorigin (self, targ.origin - self.mins);
+	setorigin(self, targ.origin - self.mins);
 	if (!self.targetname)
 	{
 		// not triggered, so start immediately
@@ -307,24 +300,24 @@ void() func_train =
 	if (!self.speed)
 		self.speed = 100;
 	if (!self.target)
-		objerror ("func_train without a target");
+		objerror("func_train without a target");
 	if (!self.dmg)
 		self.dmg = 2;
 
 	if (self.sounds == 0)
 	{
 		self.noise = ("misc/null.wav");
-		precache_sound ("misc/null.wav");
+		precache_sound("misc/null.wav");
 		self.noise1 = ("misc/null.wav");
-		precache_sound ("misc/null.wav");
+		precache_sound("misc/null.wav");
 	}
 
 	if (self.sounds == 1)
 	{
 		self.noise = ("plats/train2.wav");
-		precache_sound ("plats/train2.wav");
+		precache_sound("plats/train2.wav");
 		self.noise1 = ("plats/train1.wav");
-		precache_sound ("plats/train1.wav");
+		precache_sound("plats/train1.wav");
 	}
 
 	self.cnt = 1;
@@ -334,9 +327,9 @@ void() func_train =
 	self.use = train_use;
 	self.classname = "train";
 
-	setmodel (self, self.model);
-	setsize (self, self.mins , self.maxs);
-	setorigin (self, self.origin);
+	setmodel(self, self.model);
+	setsize(self, self.mins, self.maxs);
+	setorigin(self, self.origin);
 
 	// start trains on the second frame, to make sure their targets have had
 	// a chance to spawn
@@ -352,7 +345,7 @@ void() misc_teleporttrain =
 	if (!self.speed)
 		self.speed = 100;
 	if (!self.target)
-		objerror ("func_train without a target");
+		objerror("func_train without a target");
 
 	self.cnt = 1;
 	self.solid = SOLID_NOT;
@@ -362,14 +355,14 @@ void() misc_teleporttrain =
 	self.avelocity = '100 200 300';
 
 	self.noise = ("misc/null.wav");
-	precache_sound ("misc/null.wav");
+	precache_sound("misc/null.wav");
 	self.noise1 = ("misc/null.wav");
-	precache_sound ("misc/null.wav");
+	precache_sound("misc/null.wav");
 
-	precache_model2 ("progs/teleport.mdl");
-	setmodel (self, "progs/teleport.mdl");
-	setsize (self, self.mins , self.maxs);
-	setorigin (self, self.origin);
+	precache_model2("progs/teleport.mdl");
+	setmodel(self, "progs/teleport.mdl");
+	setsize(self, self.mins, self.maxs);
+	setorigin(self, self.origin);
 
 	// start trains on the second frame, to make sure their targets have had
 	// a chance to spawn
